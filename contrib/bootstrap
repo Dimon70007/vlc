@@ -35,6 +35,7 @@ usage()
 	echo "  --enable-ad-clauses configure to build packages with advertising clauses"
 	echo "                   (USE AT YOUR OWN LEGAL RISKS)"
 	echo "  --disable-optim  disable optimization in libraries"
+	echo " --ffmpeg-<any_custom_ffmpeg_option> used for customize ffmpeg, for options see http://git.videolan.org/git/ffmpeg.git"
 }
 
 BUILD=
@@ -49,6 +50,7 @@ GPL="1"
 GNUV3="1"
 AD_CLAUSES=
 WITH_OPTIMIZATION="1"
+FFMPEG_CUSTOM_CONFIG=
 
 if test ! -f "../../contrib/src/main.mak"
 then
@@ -101,6 +103,9 @@ do
 			;;
 		--enable-*)
 			PKGS_ENABLE="${PKGS_ENABLE} ${1#--enable-}"
+			;;
+		--ffmpeg-*)
+			FFMPEG_CUSTOM_CONFIG="${FFMPEG_CUSTOM_CONFIG} ${1#--ffmpeg-}"
 			;;
 		*)
 			echo "Unrecognized options $1"
@@ -276,7 +281,7 @@ check_tizen_sdk()
 	[ ${TIZEN_ABI} = "armv7l" ] && add_make_enabled "HAVE_NEON"
 	[ ${TIZEN_ABI} = "armv7l" ] && add_make_enabled "HAVE_ARMV7A"
 }
-
+test -z "$FFMPEG_CUSTOM_CONFIG" || add_make "FFMPEG_CUSTOM_CONFIG := $FFMPEG_CUSTOM_CONFIG"
 test -z "$PREFIX" || add_make "PREFIX := $PREFIX"
 test -z "$BUILD_DISCS" || add_make_enabled "BUILD_DISCS"
 test -z "$BUILD_ENCODERS" || add_make_enabled "BUILD_ENCODERS"

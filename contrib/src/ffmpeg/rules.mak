@@ -55,12 +55,6 @@ endif
 
 DEPS_ffmpeg = zlib gsm
 
-ifndef USE_LIBAV
-FFMPEGCONF += \
-	--enable-libopenjpeg
-DEPS_ffmpeg += openjpeg
-endif
-
 # Optional dependencies
 ifndef BUILD_NETWORK
 FFMPEGCONF += --disable-network
@@ -70,6 +64,16 @@ FFMPEGCONF += --enable-libmp3lame
 DEPS_ffmpeg += lame $(DEPS_lame)
 else
 FFMPEGCONF += --disable-encoders --disable-muxers
+endif
+
+ifdef FFMPEG_CUSTOM_CONFIG
+FFMPEGCONF += $(FFMPEG_CUSTOM_CONFIG)
+endif
+
+ifndef USE_LIBAV
+ifneq (,$(findstring --enable-libopenjpeg,$(FFMPEGCONF)))
+DEPS_ffmpeg += openjpeg
+endif
 endif
 
 # Small size
@@ -248,7 +252,8 @@ endif
 
 .ffmpeg: ffmpeg
 	cd $< && $(HOSTVARS) ./configure \
-		--extra-ldflags="$(LDFLAGS)" $(FFMPEGCONF) \
+		--extra-ldflags="$(LDFLAGS)" \
+		$(FFMPEGCONF) \
 		--prefix="$(PREFIX)" --enable-static --disable-shared
 	cd $< && $(MAKE) install-libs install-headers
 	touch $@
